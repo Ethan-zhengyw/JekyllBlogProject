@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://172.17.0.3:8000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://172.17.0.3:8000/" rel="alternate" type="text/html" /><updated>2019-01-20T17:18:14+00:00</updated><id>http://172.17.0.3:8000/feed.xml</id><title type="html">Ethan’s Blog</title><subtitle></subtitle><entry><title type="html">调用链与分布式追踪系统</title><link href="http://172.17.0.3:8000/blog/jekyll/sre/tracking/2019/01/20/distributed-tracking-system.html" rel="alternate" type="text/html" title="调用链与分布式追踪系统" /><published>2019-01-20T16:40:07+00:00</published><updated>2019-01-20T16:40:07+00:00</updated><id>http://172.17.0.3:8000/blog/jekyll/sre/tracking/2019/01/20/distributed-tracking-system</id><content type="html" xml:base="http://172.17.0.3:8000/blog/jekyll/sre/tracking/2019/01/20/distributed-tracking-system.html">&lt;p&gt;关键词：SRE，调用链，分布式追踪系统&lt;/p&gt;
+
+&lt;p&gt;上周的工作内容是开发一个运维需求——对接公有云的分布式追踪系统。服务上线转商用之前，运维能力需要满足商用要求，而使用分布式追踪系统把服务监控起来，是商用运维要求中的必须项，因此有了这个需求。一周下来，代码已经开发得差不多了，还差验证和上线工作，在这之前，先梳理回顾一下。&lt;/p&gt;
+
+&lt;p&gt;对接到分布式追踪系统之所以如此重要，是因为使用分布式追踪系统监控服务有以下好处&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;通过在各个微服务埋点打印的调用链日志，能够把一个请求处理的完整链路端到端地展示出来&lt;/li&gt;
+  &lt;li&gt;能够快速定位到异常环节，如中间在某个环节响应慢或是处理失败&lt;/li&gt;
+  &lt;li&gt;能够根据调用链日志生成服务依赖关系拓扑图，直观地观察到故障点或哪个微服务是系统的瓶颈点所在&lt;/li&gt;
+  &lt;li&gt;甚至能够根据采集的日志进行告警配置&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;我们的服务主要使用Python和Go语言进行开发，分别获取对应的SDK进行开发即可，整个开发对接上线的流程大致是这样的：&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;联系接口人沟通埋点方案&lt;/li&gt;
+  &lt;li&gt;使用统一的SDK进行埋点代码开发和测试&lt;/li&gt;
+  &lt;li&gt;整理服务—微服务—节点—日志路径信息，服务—微服务—业务—URL信息。公司的分布式追踪系统的日志采集借用了已有的日志服务的能力，日志服务接收到调用链日志时，会直接转发给分布式追踪系统，因此信息需要分别反馈给日志采集系统和分布式追踪系统在服务节点上安装日志采集Agent&lt;/li&gt;
+  &lt;li&gt;升级微服务，打开打印调用链日志的开关（开始打印调用链日志，与此同时，节点上的日志采集Agent把采集的调用链日志信息上报到日志系统）&lt;/li&gt;
+  &lt;li&gt;类生产环境验证对接效果：本地正常打印调用链日志，日志采集Agent正常上报调用链日志；分布式追踪系统能够检索到服务的Trace信息，能够正常显示微服务依赖关系拓扑图&lt;/li&gt;
+  &lt;li&gt;上线生产环境各个局点&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;埋点开发&quot;&gt;埋点开发&lt;/h3&gt;
+
+&lt;h4 id=&quot;哪些地方需要打印调用链日志呢&quot;&gt;哪些地方需要打印调用链日志呢？&lt;/h4&gt;
+&lt;p&gt;和性能调优类似，打点的地方可以包括：HTTP请求服务/客户端、RPC请求服务/客户端、数据库访问、中间件调用、本地方法调用。&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;What points should be tracked by default?
+I think that for all projects we should include by default 5 kinds of points:&lt;/p&gt;
+  &lt;ul&gt;
+    &lt;li&gt;All HTTP calls - helps to get information about: what HTTP requests were done, duration of calls (latency of service), information about projects involved in request.&lt;/li&gt;
+    &lt;li&gt;All RPC calls - helps to understand duration of parts of request related to different services in one project. This information is essential to understand which service produce the bottleneck.&lt;/li&gt;
+    &lt;li&gt;All DB API calls - in some cases slow DB query can produce bottleneck. So it’s quite useful to track how much time request spend in DB layer.&lt;/li&gt;
+    &lt;li&gt;All driver calls - in case of nova, cinder and others we have vendor drivers. Duration&lt;/li&gt;
+    &lt;li&gt;ALL SQL requests (turned off by default, because it produce a lot of traffic)&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;h4 id=&quot;埋点方式&quot;&gt;埋点方式&lt;/h4&gt;
+&lt;ol&gt;
+  &lt;li&gt;显示调用start和stop方法&lt;/li&gt;
+  &lt;li&gt;函数/类装饰器&lt;/li&gt;
+  &lt;li&gt;with代码块&lt;/li&gt;
+  &lt;li&gt;某些框架或依赖库有官方的集成支持，JAVA和Go的支持非常全，而Python的则缺少一些中间件（https://github.com/opentracing-contrib）&lt;/li&gt;
+  &lt;li&gt;听说Go还有一种直接替换Go-SDK就能够完成埋点功能注入的方式…&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;两篇重要的论文&quot;&gt;两篇重要的论文&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;《Dapper, a Large-Scale Distributed Systems Tracing Infrastructure》—— 让分布式追踪系统这个领域流行起来&lt;/li&gt;
+  &lt;li&gt;《Uncertainty in Aggregate Estimates from Sampled Distributed Traces》—— 关于采样的详细分析&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;标准&quot;&gt;标准&lt;/h3&gt;
+&lt;p&gt;Uber发起的OpenTracing现在已经成为云原生计算基金会的一个子项目，&lt;a href=&quot;https://github.com/opentracing/specification/blob/master/specification.md&quot;&gt;OpenTracing Semantic Specification&lt;/a&gt;定义了数据采集时的数据模型和一些接口，应该算是分布式追踪系统的接口标准了，比较出名的Jaeger和Zipkin都实现了OpenTracing API。&lt;/p&gt;
+
+&lt;h3 id=&quot;业界实践&quot;&gt;业界实践&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;阿里淘宝：EagleEye&lt;/li&gt;
+  &lt;li&gt;Twitter：Zipkin&lt;/li&gt;
+  &lt;li&gt;Uber：Jaeger&lt;/li&gt;
+  &lt;li&gt;AWS：XRays&lt;/li&gt;
+  &lt;li&gt;Google：Dapper，StakeDriver Trace，OpenCensus&lt;/li&gt;
+  &lt;li&gt;Golang：AppDash&lt;/li&gt;
+  &lt;li&gt;蚂蚁：云图&lt;/li&gt;
+  &lt;li&gt;阿里云：谛听，盘古&lt;/li&gt;
+  &lt;li&gt;神马：STrace&lt;/li&gt;
+  &lt;li&gt;OpenStack：osprofiler（原本是用于采集方法调用耗时数据，上报到ceilometer监控计量计费系统，用于性能调优，经过定制修改日志打印格式兼容OpenTracing的话打印出来的就是调用链日志了）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;参考链接&quot;&gt;参考链接&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://blog.csdn.net/yunqiinsight/article/details/80134045&quot;&gt;https://blog.csdn.net/yunqiinsight/article/details/80134045&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://yq.aliyun.com/articles/514488&quot;&gt;https://yq.aliyun.com/articles/514488&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.cnblogs.com/sting2me/p/4393018.html&quot;&gt;https://www.cnblogs.com/sting2me/p/4393018.html&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://blog.appoptics.com/intro-to-opentracing-and-opencensus-for-distributed-tracing/&quot;&gt;https://blog.appoptics.com/intro-to-opentracing-and-opencensus-for-distributed-tracing/&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://logz.io/blog/zipkin-vs-jaeger/&quot;&gt;https://logz.io/blog/zipkin-vs-jaeger/&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://opentracing.io/&quot;&gt;https://opentracing.io/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">关键词：SRE，调用链，分布式追踪系统</summary></entry><entry><title type="html">类生产环境UI自动化测试失败用例处理</title><link href="http://172.17.0.3:8000/blog/jekyll/sre/testing/2019/01/06/handle-UI-testcase-fails-of-preproduction-environment.html" rel="alternate" type="text/html" title="类生产环境UI自动化测试失败用例处理" /><published>2019-01-06T02:00:07+00:00</published><updated>2019-01-06T02:00:07+00:00</updated><id>http://172.17.0.3:8000/blog/jekyll/sre/testing/2019/01/06/handle-UI-testcase-fails-of-preproduction-environment</id><content type="html" xml:base="http://172.17.0.3:8000/blog/jekyll/sre/testing/2019/01/06/handle-UI-testcase-fails-of-preproduction-environment.html">&lt;p&gt;关键词：SRE，自动化测试，API设计&lt;/p&gt;
+
+&lt;p&gt;这周六服务有许多UI自动化测试用例跑失败了，直接原因是后台依赖的一个外部服务概率性需要一两分钟才返回，响应非常慢，导致后台响应前台慢，前台等待后台响应超时，于是测试用例就执行失败了。&lt;/p&gt;
+
+&lt;p&gt;发现外部依赖服务响应慢时，一方面需要联系相应的on-call来处理，另外一方面，还需要意识到自己的服务本身也存在可靠性问题——外部服务不总是可靠的，我们的服务需要有一定的容错机制。在响应很慢的情况下，不能一直等待对方响应，应该配置合理的超时时间，而且一次调用超时，可能只要重试一两次对方就能成功快速响应请求了。&lt;/p&gt;
+
+&lt;p&gt;最终的解决方案&lt;/p&gt;
+
+&lt;p&gt;后端访问外部服务时考虑业务健壮性，启动一个协程去调用外部服务，同时增加调用外部服务时的超时时间和重试次数配置，从而提高服务本身的可靠性。
+完善监控指标和告警配置，添加从该后端组件到外部依赖服务之间的连通性指标。如果在一定长度的时间窗内，采集的连通性指标连续几次值为异常，就触发相应的告警&lt;/p&gt;</content><author><name></name></author><summary type="html">关键词：SRE，自动化测试，API设计</summary></entry><entry><title type="html">Initial my blog site in github page with Jekyll</title><link href="http://172.17.0.3:8000/blog/jekyll/update/github/2018/12/03/initial-my-blog-site-in-Github-page.html" rel="alternate" type="text/html" title="Initial my blog site in github page with Jekyll" /><published>2018-12-03T02:00:07+00:00</published><updated>2018-12-03T02:00:07+00:00</updated><id>http://172.17.0.3:8000/blog/jekyll/update/github/2018/12/03/initial-my-blog-site-in-Github-page</id><content type="html" xml:base="http://172.17.0.3:8000/blog/jekyll/update/github/2018/12/03/initial-my-blog-site-in-Github-page.html">&lt;p&gt;You’ll find this post in your &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
+
+&lt;p&gt;To add new posts, simply add a file in the &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory that follows the convention &lt;code class=&quot;highlighter-rouge&quot;&gt;YYYY-MM-DD-name-of-post.ext&lt;/code&gt; and includes the necessary front matter. Take a look at the source for this post to get an idea about how it works.&lt;/p&gt;
+
+&lt;p&gt;Jekyll also offers powerful support for code snippets:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Hi, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Tom'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints 'Hi, Tom' to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Check out the &lt;a href=&quot;https://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://talk.jekyllrb.com/&quot;&gt;Jekyll Talk&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><summary type="html">You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.</summary></entry><entry><title type="html">Welcome to Jekyll!</title><link href="http://172.17.0.3:8000/blog/jekyll/update/2018/12/02/welcome-to-jekyll.html" rel="alternate" type="text/html" title="Welcome to Jekyll!" /><published>2018-12-02T13:51:07+00:00</published><updated>2018-12-02T13:51:07+00:00</updated><id>http://172.17.0.3:8000/blog/jekyll/update/2018/12/02/welcome-to-jekyll</id><content type="html" xml:base="http://172.17.0.3:8000/blog/jekyll/update/2018/12/02/welcome-to-jekyll.html">&lt;p&gt;You’ll find this post in your &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
+
+&lt;p&gt;To add new posts, simply add a file in the &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory that follows the convention &lt;code class=&quot;highlighter-rouge&quot;&gt;YYYY-MM-DD-name-of-post.ext&lt;/code&gt; and includes the necessary front matter. Take a look at the source for this post to get an idea about how it works.&lt;/p&gt;
+
+&lt;p&gt;Jekyll also offers powerful support for code snippets:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Hi, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Tom'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints 'Hi, Tom' to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Check out the &lt;a href=&quot;https://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://talk.jekyllrb.com/&quot;&gt;Jekyll Talk&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><summary type="html">You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.</summary></entry></feed>
