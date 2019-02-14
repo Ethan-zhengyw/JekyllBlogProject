@@ -1,4 +1,293 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://172.17.0.3:8000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://172.17.0.3:8000/" rel="alternate" type="text/html" /><updated>2019-01-20T17:18:14+00:00</updated><id>http://172.17.0.3:8000/feed.xml</id><title type="html">Ethan’s Blog</title><subtitle></subtitle><entry><title type="html">调用链与分布式追踪系统</title><link href="http://172.17.0.3:8000/blog/jekyll/sre/tracking/2019/01/20/distributed-tracking-system.html" rel="alternate" type="text/html" title="调用链与分布式追踪系统" /><published>2019-01-20T16:40:07+00:00</published><updated>2019-01-20T16:40:07+00:00</updated><id>http://172.17.0.3:8000/blog/jekyll/sre/tracking/2019/01/20/distributed-tracking-system</id><content type="html" xml:base="http://172.17.0.3:8000/blog/jekyll/sre/tracking/2019/01/20/distributed-tracking-system.html">&lt;p&gt;关键词：SRE，调用链，分布式追踪系统&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://172.17.0.3:8000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://172.17.0.3:8000/" rel="alternate" type="text/html" /><updated>2019-02-14T09:37:44+00:00</updated><id>http://172.17.0.3:8000/feed.xml</id><title type="html">Ethan’s Blog</title><subtitle></subtitle><entry><title type="html">AWS架构完善五大支柱之卓越操作支柱</title><link href="http://172.17.0.3:8000/blog/jekyll/architects/framework/2019/02/13/aws-well-architected-framework-operational-excellence-pillar.html" rel="alternate" type="text/html" title="AWS架构完善五大支柱之卓越操作支柱" /><published>2019-02-13T11:57:00+00:00</published><updated>2019-02-13T11:57:00+00:00</updated><id>http://172.17.0.3:8000/blog/jekyll/architects/framework/2019/02/13/aws-well-architected-framework-operational-excellence-pillar</id><content type="html" xml:base="http://172.17.0.3:8000/blog/jekyll/architects/framework/2019/02/13/aws-well-architected-framework-operational-excellence-pillar.html">&lt;p&gt;关键词：AWS, Architects, Well-Architected Framework, Operational Execellence&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://github.com/Ethan-zhengyw/EveryThingNote/blob/master/2019/02/images/aws-well-architected-framework-operational-excellence-pillar.svg&quot; alt=&quot;本文结构&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;前言&quot;&gt;前言&lt;/h2&gt;
+
+&lt;h3 id=&quot;卓越操作定义&quot;&gt;卓越操作定义&lt;/h3&gt;
+&lt;p&gt;卓越操作支柱是&lt;a href=&quot;https://www.jianshu.com/p/c6675eff8b52&quot;&gt;AWS架构完善框架的五大支柱&lt;/a&gt;之一，侧重于运行和监测系统以提供业务价值，并不断改进流程和程序。关键主题包括：管理和自动化变更、响应事件以及定义标准以成功管理日常操作。&lt;/p&gt;
+
+&lt;p&gt;这份&lt;a href=&quot;https://d1.awsstatic-china.com/whitepapers/architecture/AWS-Operational-Excellence-Pillar.pdf&quot;&gt;白皮书&lt;/a&gt;阐述了AWS架构完善框架五大支柱中的卓越操作支柱，它讨论了操作&lt;strong&gt;筹备&lt;/strong&gt;、操作&lt;strong&gt;实施&lt;/strong&gt;、操作&lt;strong&gt;演进&lt;/strong&gt;三个方面的概念、设计原则和最佳实践，指导架构师、软件开发人员在基于AWS平台设计、交付和维护软件时应用这些最佳实践。&lt;/p&gt;
+
+&lt;p&gt;下面的内容是我阅读AWS架构完善卓越操作白皮书时整理的笔记和心得。&lt;/p&gt;
+
+&lt;h3 id=&quot;卓越操作设计原则&quot;&gt;卓越操作设计原则&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;使用代码进行操作&lt;/strong&gt;
+应用基础设施即代码、使用代码进行变更、使用代码响应事件，减少人为操作失误导致的失败，快速响应事件。&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;为文档做注释&lt;/strong&gt;
+手工创建文档时自动生成注释、每次构建时自动生成注释文档，注释文档能够被人或系统使用（作为操作代码的输入），具体应用场景？&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;进行高频、小型、可逆的变更&lt;/strong&gt;
+代码尽快入库、入库的代码尽快上线生产环境，尽可能保证一次变更的变更内容单一，从而提高变更成功率、缩短变更时长、缩短变更失败回退所需时长。&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;持续改进操作流程&lt;/strong&gt;
+在操作过程中注意不足之处，寻找能够改进的地方，确定一个固定的时间对操作流程进行回顾、讨论、完善，确保团队熟悉这个过程。&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;预见错误的发生&lt;/strong&gt;
+即提前进行故障场景梳理，分析影响，并制定必要的应急响应预案，确定一个固定的时间（“竞赛日活动”）进行运维演练，检验响应预案的有效性以及团队是否具足够的故障响应能力。&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;从所有操作失败中学习&lt;/strong&gt;
+从所有操作事件和失败中汲取经验来推动改进，将经验在团队内部，以及整个组织范围内进行分享。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;筹备&quot;&gt;筹备&lt;/h2&gt;
+&lt;h3 id=&quot;确定优先级&quot;&gt;确定优先级&lt;/h3&gt;
+&lt;p&gt;团队内处理问题时有必要对问题优先级进行讨论，建立共识。这样能够大大减少因认识不统一，目标不统一导致的团队内冲突。&lt;/p&gt;
+
+&lt;p&gt;举个例子，实现运维需求时，需要根据业务要求对需求进行排序，如果我们把运维的需求划分为两大类：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;第一类：对系统发布速度有提升的需求&lt;/li&gt;
+  &lt;li&gt;第二类：对系统可靠性有提升的需求&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;如果客户希望能够快速看到运行起来的系统原型，对于可靠性要求暂时不高时，那么可以适当地把第一类运维需求的优先级提高，以快速迭代交付新的演示功能；反之，若是在服务已公测或商用，使用者数目较大时，则需要优先实现第二类运维需求，提高系统可靠性，确保SLA达成。&lt;/p&gt;
+
+&lt;p&gt;再举个例子，当on-call接收到现网事件时，对于用户报障类的问题，应该优先考虑恢复，而后再进行定位问题。如果是开发兼任on-call，而不是训练有素的专业on-call，很可能会习惯性地花费大量时间定位根因。这样客户可能会不满意，客户迫切想要的可能是快速规避问题，恢复业务，减少损失，降低名誉伤害。&lt;/p&gt;
+
+&lt;h3 id=&quot;设计时考虑操作&quot;&gt;设计时考虑操作&lt;/h3&gt;
+&lt;p&gt;AWS建议在设计工作负载时，就考虑把部署、变更、监控，告警纳入考虑。这些领域主要包括：基础设施即代码，持续集成与持续部署，监控，告警，分布式追踪等。&lt;/p&gt;
+
+&lt;p&gt;相关的AWS服务：AWS CloudFormation，AWS Developer Tools（AWS CodeCommit、AWS CodeBuild, AWS CodePipeline，AWS CodeDeploy, and AWS CodeStar），AWS CloudWatch，AWS X-Ray…&lt;/p&gt;
+
+&lt;p&gt;有经验丰富的SRE或是擅长CICD工程师在服务孵化的早期就参与进来，对于服务卓越操作目标的达成将非常有帮助。&lt;/p&gt;
+
+&lt;h3 id=&quot;准备度评估&quot;&gt;准备度评估&lt;/h3&gt;
+&lt;p&gt;阅读过《Google SRE运维解密》这本书的同学，看到这个小标题时一定联想到到了书中提出的PRR模型吧！PRR（Pilot Readiness Review，试点准备度评估）模型是Google提出的用于评估一个系统的运维能力是否满足上线生产环境的要求的模型。&lt;/p&gt;
+
+&lt;p&gt;回顾一下，这个模型都讲了些什么呢？其实就是一份Checklist，比如：服务的架构设计是否满足规范、基础组件的选型是否使用公司内部基础设施工程部提供的标准的公共组件、可靠性（系统可靠性，数据可靠性，运维可靠性，可靠性管理）是否满足要求、可运维能力（监控，告警，日志采集，调用链能力是否具备）、基于业务场景的故障梳理，进行运维演练，测试故障处理流程，应急响应预案是否有效…&lt;/p&gt;
+
+&lt;p&gt;不在这个模型里的一点应该是对处理事件的人员进行培训，确保他们具备足够的知识和技能。&lt;/p&gt;
+
+&lt;p&gt;相关的AWS服务：AWS Config（配置基线话，如果更改了配置导致系统故障，能够快速回退到上一份正确的配置，快速恢复环境），AWS System Manager&lt;/p&gt;
+
+&lt;h2 id=&quot;操作&quot;&gt;操作&lt;/h2&gt;
+&lt;h3 id=&quot;理解操作健康&quot;&gt;理解操作健康&lt;/h3&gt;
+&lt;p&gt;一次成功的操作代表新的配置生效了，或者新的特性上线了，并且原有的和新增的拨测用例都还能执行成功。AWS建议通过定义明确的业务和技术指标，并把它们呈现在看板上，以便在操作失败时快速得到反馈，并及时作出响应。&lt;/p&gt;
+
+&lt;p&gt;相关的AWS服务：Cloud Watch Log/Event，Personal Health Dashboard，Service Health Dashboard，AWS Elastic Search。&lt;/p&gt;
+
+&lt;h3 id=&quot;响应事件&quot;&gt;响应事件&lt;/h3&gt;
+&lt;p&gt;这部分谈论的是事件管理费流程。事件分类，预料的和未预料的。处理事件需要依据一个不断完善的事件处理流程。这个流程需要保证事件的处理进展和问题影响能够及时地同步到关心事件的相关团队，处理阻塞时要分层上升，以便请求更强的资源帮助问题解决！问题解决要追求根因分析，从源头上解决问题，避免再次出现相同的问题。&lt;/p&gt;
+
+&lt;p&gt;相关的AWS服务：AWS提供了一些服务能够监控某些事件的发生（Cloud Watch），配置规则（Cloud Watch Rules），触发目标服务（Cloud Watch Target）执行预定义的操作（Cloud Watch Event）作为响应，比如：发送短讯通知（SNS），执行Lambda函数（AWS Lambda），执行EC2实例任务，自动伸缩动作（Auto Scaling）&lt;/p&gt;
+
+&lt;p&gt;另外，AWS也对一些第三方的监控，数据处理软件提供了支持，能够把数据通过API发送给第三方应用。&lt;/p&gt;
+
+&lt;h2 id=&quot;演进&quot;&gt;演进&lt;/h2&gt;
+&lt;h3 id=&quot;通过经验学习&quot;&gt;通过经验学习&lt;/h3&gt;
+
+&lt;p&gt;定期分析失败用例，并从中学习，避免团队，或者所处的更大的项目组避免重蹈覆辙，这是非常有意义的。&lt;/p&gt;
+
+&lt;p&gt;AWS能够帮助聚合操作活动，工作负载，或者基础设施的日志（CLOUD WATCH），并提供相关的工具帮助分析我们的操作，趋势或者不同系统在不同配置下对操作的响应结果，基于此，我们能够分析计划改进。&lt;/p&gt;
+
+&lt;p&gt;相关的AWS服务：Amazon QuickSight，Amazon Athena，Amazon S3，Amazon CloudWatch&lt;/p&gt;
+
+&lt;h3 id=&quot;分享学习收获&quot;&gt;分享学习收获&lt;/h3&gt;
+&lt;p&gt;在团队内、不同团队间、组织内分享文档，标准的基础设施模板，有需要时可对分享的资源设置必要的访问权限。&lt;/p&gt;
+
+&lt;p&gt;相关的AWS服务：AWS Identity and Access Management，Amazon SNS，AWS CodeCommit，AWS Lambda，AWS CloudFormation，Amazon Machine Images（AMI）&lt;/p&gt;
+
+&lt;h2 id=&quot;总结&quot;&gt;总结&lt;/h2&gt;
+&lt;p&gt;以上筹备、操作、与演进三部分内容可总结提炼出以下&lt;strong&gt;卓越操作最佳实践&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;运维人员需要理解业务和客户需求才能有效、高效支撑业务&lt;/li&gt;
+  &lt;li&gt;运维人员创建操作流程并在实践中检验流程是否有效支持业务需要&lt;/li&gt;
+  &lt;li&gt;运维人员需要通过制定、采集指标来衡量目标达成情况&lt;/li&gt;
+  &lt;li&gt;业务场景、业务优先级、客户需求会不断发生变化，在变化来临是，需要能够及时调整操作流程以适应改变&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;心得感想&quot;&gt;心得感想&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;从持续改进操作流程到当责文化&lt;/strong&gt;
+确保团队熟悉相关的重要流程很重要，但是制定符合实际、具备可操作型的流程更重要，制定安排工作计划时也是。如果流程规范/工作安排不是切实可行的，团队成员默默接受遵循/进行不切实际的流程规范/工作的要求，放弃主动思考流程规范中存在的问题、工作的实际内容合理的工时并提出自己的看法，可以预见的是团队成员将无法遵循规范或按时完成工作，这对团队内当责文化的建立非常不利。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;AWS卓越操作支柱与Google SRE&lt;/strong&gt;
+AWS卓越操作支柱中的设计原则和最佳实践与Google提出的SRE指导思想和最佳实践具有相似性：&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;AWS架构完善之卓越操作支柱&lt;/th&gt;
+      &lt;th&gt;Google SRE&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;运维人员需要理解业务和客户需求才能有效、高效支撑业务&lt;/td&gt;
+      &lt;td&gt;制定针对用户的服务质量目标，并且努力去达到这个质量目标&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;运维人员创建操作流程并在实践中检验流程是否有效支持业务需要&lt;/td&gt;
+      &lt;td&gt;用超过10年的时间打磨发布流程，并发现好的发布流程具有的一些特征：轻量级、鲁棒性、完整性、可扩展性…&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;运维人员需要通过制定、采集指标来衡量目标达成情况&lt;/td&gt;
+      &lt;td&gt;建立全方位的监控与警报系统&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;从所有操作失败中学习&lt;/td&gt;
+      &lt;td&gt;事后总结哲学&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h2 id=&quot;参考链接&quot;&gt;参考链接&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;https://d1.awsstatic-china.com/whitepapers/architecture/AWS-Operational-Excellence-Pillar.pdf&lt;/li&gt;
+  &lt;li&gt;https://amazonaws-china.com/cn/architecture/well-architected/&lt;/li&gt;
+  &lt;li&gt;https://amazonaws-china.com/cn/blogs/apn/the-5-pillars-of-the-aws-well-architected-framework/&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">关键词：AWS, Architects, Well-Architected Framework, Operational Execellence</summary></entry><entry><title type="html">AWS良好架构框架的五大支柱</title><link href="http://172.17.0.3:8000/blog/jekyll/architects/framework/2019/02/03/five-pillars-of-aws-well-architected-framework.html" rel="alternate" type="text/html" title="AWS良好架构框架的五大支柱" /><published>2019-02-03T15:05:00+00:00</published><updated>2019-02-03T15:05:00+00:00</updated><id>http://172.17.0.3:8000/blog/jekyll/architects/framework/2019/02/03/five-pillars-of-aws-well-architected-framework</id><content type="html" xml:base="http://172.17.0.3:8000/blog/jekyll/architects/framework/2019/02/03/five-pillars-of-aws-well-architected-framework.html">&lt;p&gt;关键词：AWS, Architects, Well-Architected Framework&lt;/p&gt;
+
+&lt;h2 id=&quot;前言&quot;&gt;前言&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;写一个软件系统和建筑工程很类似，如果基础不牢固，结构性问题会暗中侵蚀建筑物的功能和完整性&lt;/li&gt;
+  &lt;li&gt;基于AWS设计技术解决方案时，如果忽视卓越操作、安全性、可靠性、性能效率和成本优化这五大支柱，交付一个能满足你需求期望的系统可能就比较困难&lt;/li&gt;
+  &lt;li&gt;如果把这五大支柱纳入架构设计时的考量范围，能够帮助我们构建稳定、高效的软件系统，从而有更多的精力投入其他方面的工作，例如业务功能需求&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;什么是aws-well-architected-framework&quot;&gt;什么是AWS Well-Architected Framework？&lt;/h2&gt;
+&lt;p&gt;AWS Well-Architected Framework可帮助云架构师为其应用程序构建安全、高性能、具有弹性和高效的基础设施。基于安全性、可靠性、性能效率、成本优化和卓越操作这五个基础支柱，此框架为客户和合作伙伴提供了一种评估架构的一致方法，并实施能够在使用中扩展的设计。&lt;/p&gt;
+
+&lt;h2 id=&quot;五大支柱概览&quot;&gt;五大支柱概览&lt;/h2&gt;
+
+&lt;h3 id=&quot;卓越操作&quot;&gt;卓越操作&lt;/h3&gt;
+
+&lt;h4 id=&quot;定义&quot;&gt;定义&lt;/h4&gt;
+&lt;p&gt;卓越操作支柱侧重于运行和监测系统以提供业务价值，并不断改进流程和程序。关键主题包括：管理和自动化变更、响应事件以及定义标准以成功管理日常操作。&lt;/p&gt;
+
+&lt;h4 id=&quot;白皮书&quot;&gt;白皮书&lt;/h4&gt;
+&lt;p&gt;https://d1.awsstatic-china.com/whitepapers/architecture/AWS-Operational-Excellence-Pillar.pdf&lt;/p&gt;
+
+&lt;h4 id=&quot;设计原则&quot;&gt;设计原则&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;使用代码进行操作&lt;/li&gt;
+  &lt;li&gt;为文档做注释&lt;/li&gt;
+  &lt;li&gt;用高频率、单一变更内容（小）、可回退的变更替代大批量的变更&lt;/li&gt;
+  &lt;li&gt;持续改进变更流程&lt;/li&gt;
+  &lt;li&gt;预见错误的发生&lt;/li&gt;
+  &lt;li&gt;从所有操作错误中学习&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;最佳实践&quot;&gt;最佳实践&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;运维人员需要理解业务和客户需求才能正确支撑业务&lt;/li&gt;
+  &lt;li&gt;运维人员创建操作流程并在实践中检验流程是否有效支持业务需要&lt;/li&gt;
+  &lt;li&gt;运维人员需要通过采集指标来衡量业务需要是否达到要求，得到满足&lt;/li&gt;
+  &lt;li&gt;业务场景、业务优先级、客户需求会不断发生变化，在变化来临是，需要能够及时调整操作流程以适应改变&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;安全性&quot;&gt;安全性&lt;/h3&gt;
+
+&lt;h4 id=&quot;定义-1&quot;&gt;定义&lt;/h4&gt;
+&lt;p&gt;安全支柱侧重于保护信息和系统。关键主题包括：数据的机密性和完整性、识别和管理谁可以进行哪些权限管理工作、保护系统以及建立检测安全事件的控制措施。&lt;/p&gt;
+
+&lt;h4 id=&quot;白皮书-1&quot;&gt;白皮书&lt;/h4&gt;
+&lt;p&gt;https://d1.awsstatic-china.com/whitepapers/architecture/AWS-Security-Pillar.pdf&lt;/p&gt;
+
+&lt;h4 id=&quot;设计原则-1&quot;&gt;设计原则&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;强身份认证作为基础&lt;/li&gt;
+  &lt;li&gt;使系统具备可追溯能力&lt;/li&gt;
+  &lt;li&gt;在不同层级上确保安全性&lt;/li&gt;
+  &lt;li&gt;自动化安全性最佳实践&lt;/li&gt;
+  &lt;li&gt;静止的和传输中的数据都要保护&lt;/li&gt;
+  &lt;li&gt;提前为安全事故做好准备&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;最佳实践-1&quot;&gt;最佳实践&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;在设计系统之前，考虑谁可以使用它？怎么识别安全事故？如何保障数据的完整性和可靠性？&lt;/li&gt;
+  &lt;li&gt;需要指定详细的并且经过实践验证的安全事故响应流程，这对于减少商业损失和遵循监管意义重大&lt;/li&gt;
+  &lt;li&gt;定义AWS责任共担模型，AWS与客户分别承担相应的责任&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;可靠性&quot;&gt;可靠性&lt;/h3&gt;
+
+&lt;h4 id=&quot;定义-2&quot;&gt;定义&lt;/h4&gt;
+&lt;p&gt;可靠性支柱侧重于预防故障、快速从故障中恢复根据业务量动态调整资源以满足业务和客户需求的能力。关键主题包括：设置相关的基本要素、跨项目要求、恢复计划以及我们如何处理变更。&lt;/p&gt;
+
+&lt;h4 id=&quot;白皮书-2&quot;&gt;白皮书&lt;/h4&gt;
+&lt;p&gt;https://d1.awsstatic-china.com/whitepapers/architecture/AWS-Reliability-Pillar.pdf&lt;/p&gt;
+
+&lt;h4 id=&quot;设计原则-2&quot;&gt;设计原则&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;测试故障恢复流程，演练异常恢复方案&lt;/li&gt;
+  &lt;li&gt;自动从异常中恢复&lt;/li&gt;
+  &lt;li&gt;通过水平扩展提升服务整体可用性&lt;/li&gt;
+  &lt;li&gt;停止猜测系统能力&lt;/li&gt;
+  &lt;li&gt;通过自动化管理变更&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;最佳实践-2&quot;&gt;最佳实践&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;可靠性的达成，要求对系统各个方面进行监控、配置相应的告警策略、管控变更、能够从错误中自愈&lt;/li&gt;
+  &lt;li&gt;考虑基础底座的可靠性，例如网络带宽&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;性能效率&quot;&gt;性能效率&lt;/h3&gt;
+
+&lt;h4 id=&quot;定义-3&quot;&gt;定义&lt;/h4&gt;
+&lt;p&gt;性能效率支柱侧重于高效使用 IT 和计算资源。关键主题包括：根据工作负载要求选择合适的资源类型和大小、监测性能以及做出明智的决策以在业务需求发展或技术革新时维持效率。&lt;/p&gt;
+
+&lt;h4 id=&quot;白皮书-3&quot;&gt;白皮书&lt;/h4&gt;
+&lt;p&gt;https://d1.awsstatic-china.com/whitepapers/architecture/AWS-Performance-Efficiency-Pillar.pdf&lt;/p&gt;
+
+&lt;h4 id=&quot;设计原则-3&quot;&gt;设计原则&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;广泛采用先进技术&lt;/li&gt;
+  &lt;li&gt;全球范围分钟级可达&lt;/li&gt;
+  &lt;li&gt;使用无服务器架构&lt;/li&gt;
+  &lt;li&gt;频繁进行实验&lt;/li&gt;
+  &lt;li&gt;理解机器？&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;最佳实践-3&quot;&gt;最佳实践&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;数据驱动，收集各个方面的数据，从高层次的设计层面决定资源的规格&lt;/li&gt;
+  &lt;li&gt;通过监控发现性能效率异常以及时采取行动，循环检视确保在云化过程中活得了收益&lt;/li&gt;
+  &lt;li&gt;根据业务场景需求，适当权衡取舍，比如压缩或缓存、降低一致性要求优化性能&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;成本优化&quot;&gt;成本优化&lt;/h3&gt;
+
+&lt;h4 id=&quot;定义-4&quot;&gt;定义&lt;/h4&gt;
+&lt;p&gt;成本优化侧重于避免不必要的成本。关键主题包括：了解和控制资金的使用、选择最合适的资源类型和数量、分析一段时间内的支出以及扩展以满足业务需求而不超支。&lt;/p&gt;
+
+&lt;h4 id=&quot;白皮书-4&quot;&gt;白皮书&lt;/h4&gt;
+&lt;p&gt;https://d1.awsstatic-china.com/whitepapers/architecture/AWS-Cost-Optimization-Pillar.pdf&lt;/p&gt;
+
+&lt;h4 id=&quot;设计原则-4&quot;&gt;设计原则&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;确定一个消费模型&lt;/li&gt;
+  &lt;li&gt;度量整体的效率&lt;/li&gt;
+  &lt;li&gt;停止在数据中心操作上支出&lt;/li&gt;
+  &lt;li&gt;分析分类支出&lt;/li&gt;
+  &lt;li&gt;相对于完全拥有服务的所有权，使用代理管理的服务以减少支出&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;最佳实践-4&quot;&gt;最佳实践&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;成本也是需要权衡的，比如需要快速上线，过点、交付市场，提供新特性，把成本先放一放也不是不可以&lt;/li&gt;
+  &lt;li&gt;违背了经验数据进行设计决策，总是想着以防万一，可能会导致极大的资源浪费增加不必要的开销&lt;/li&gt;
+  &lt;li&gt;选择合适规格的资源实例是成本控制的钥匙，比如一个业务程序在小规格实例上需要跑5个小时，而在大规格的实例上只需要跑1个小时，哪一种才是最高效的？&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;总结&quot;&gt;总结&lt;/h2&gt;
+&lt;p&gt;AWS Well-Architected Framework提供了架构完善的五大支柱以及最佳实践，帮助我们基于AWS设计和操作可靠、安全、性能成本高效的系统，从而有更多的精力投入其他方面的工作，例如业务功能需求。&lt;/p&gt;
+
+&lt;h2 id=&quot;心得感想&quot;&gt;心得感想&lt;/h2&gt;
+&lt;p&gt;卓越操作与可靠性，卓越操作其实是为了降低运维过程中犯错的可能，或缩短因犯错导致系统不可用的时长，从运维层面保障了系统的可靠性。AWS架构完善五大支柱中的卓越操作与可靠性相关的设计原则和最佳实践与Google的SRE中的许多思想（如监控系统、变更管理、制定服务质量目标等）是一致的。&lt;/p&gt;
+
+&lt;p&gt;安全性，作为一名开发人员，曾经被测试提出不少安全问题，类别五花八门：有横向纵向越权问题、存储/打印用户敏感信息、文件目录权限过大、系统使用弱密码、使用root权限启动业务进程，引入带有漏洞或存在法务风险的第三方软件等。系统的安全性是重中之重，在实际工作中，我们通过安全设计、安全编码以及安全测试保障系统的安全性达到要求、符合地方法规。&lt;/p&gt;
+
+&lt;h2 id=&quot;参考链接&quot;&gt;参考链接&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;https://amazonaws-china.com/cn/blogs/apn/the-5-pillars-of-the-aws-well-architected-framework/&lt;/li&gt;
+  &lt;li&gt;https://amazonaws-china.com/cn/architecture/well-architected/&lt;/li&gt;
+  &lt;li&gt;https://soundcloud.com/amazon-web-services-306355661/202-the-aws-well-architected-framework&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">关键词：AWS, Architects, Well-Architected Framework</summary></entry><entry><title type="html">调用链与分布式追踪系统</title><link href="http://172.17.0.3:8000/blog/jekyll/sre/tracking/2019/01/20/distributed-tracking-system.html" rel="alternate" type="text/html" title="调用链与分布式追踪系统" /><published>2019-01-20T16:40:07+00:00</published><updated>2019-01-20T16:40:07+00:00</updated><id>http://172.17.0.3:8000/blog/jekyll/sre/tracking/2019/01/20/distributed-tracking-system</id><content type="html" xml:base="http://172.17.0.3:8000/blog/jekyll/sre/tracking/2019/01/20/distributed-tracking-system.html">&lt;p&gt;关键词：SRE，调用链，分布式追踪系统&lt;/p&gt;
 
 &lt;p&gt;上周的工作内容是开发一个运维需求——对接公有云的分布式追踪系统。服务上线转商用之前，运维能力需要满足商用要求，而使用分布式追踪系统把服务监控起来，是商用运维要求中的必须项，因此有了这个需求。一周下来，代码已经开发得差不多了，还差验证和上线工作，在这之前，先梳理回顾一下。&lt;/p&gt;
 
