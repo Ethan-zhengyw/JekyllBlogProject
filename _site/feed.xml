@@ -1,4 +1,203 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://172.17.0.3:8000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://172.17.0.3:8000/" rel="alternate" type="text/html" /><updated>2019-02-14T09:37:44+00:00</updated><id>http://172.17.0.3:8000/feed.xml</id><title type="html">Ethan’s Blog</title><subtitle></subtitle><entry><title type="html">AWS架构完善五大支柱之卓越操作支柱</title><link href="http://172.17.0.3:8000/blog/jekyll/architects/framework/2019/02/13/aws-well-architected-framework-operational-excellence-pillar.html" rel="alternate" type="text/html" title="AWS架构完善五大支柱之卓越操作支柱" /><published>2019-02-13T11:57:00+00:00</published><updated>2019-02-13T11:57:00+00:00</updated><id>http://172.17.0.3:8000/blog/jekyll/architects/framework/2019/02/13/aws-well-architected-framework-operational-excellence-pillar</id><content type="html" xml:base="http://172.17.0.3:8000/blog/jekyll/architects/framework/2019/02/13/aws-well-architected-framework-operational-excellence-pillar.html">&lt;p&gt;关键词：AWS, Architects, Well-Architected Framework, Operational Execellence&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://172.17.0.3:8000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://172.17.0.3:8000/" rel="alternate" type="text/html" /><updated>2019-02-25T13:05:30+00:00</updated><id>http://172.17.0.3:8000/feed.xml</id><title type="html">Ethan’s Blog</title><subtitle></subtitle><entry><title type="html">AWS架构完善五大支柱之安全性支柱</title><link href="http://172.17.0.3:8000/blog/jekyll/architects/framework/2019/02/22/aws-well-architected-framework-security-pillar.html" rel="alternate" type="text/html" title="AWS架构完善五大支柱之安全性支柱" /><published>2019-02-22T14:43:00+00:00</published><updated>2019-02-22T14:43:00+00:00</updated><id>http://172.17.0.3:8000/blog/jekyll/architects/framework/2019/02/22/aws-well-architected-framework-security-pillar</id><content type="html" xml:base="http://172.17.0.3:8000/blog/jekyll/architects/framework/2019/02/22/aws-well-architected-framework-security-pillar.html">&lt;p&gt;关键词：AWS, Architects, Well-Architected Framework, Security&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://github.com/Ethan-zhengyw/EveryThingNote/blob/master/2019/02/images/aws-well-architected-framework-security-pillar.svg&quot; alt=&quot;本文结构&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;1-前言&quot;&gt;1. 前言&lt;/h2&gt;
+&lt;h3 id=&quot;11-安全性定义&quot;&gt;1.1 安全性定义&lt;/h3&gt;
+&lt;p&gt;安全性支柱是AWS架构完善框架的五大支柱之一，围绕如何通风险评估及安全策略保护信息、系统以及资产，交付商业价值。 它包含以下五个方面的内容：身份与访问管理、检测控制、基础设施保护、数据保护、事件响应。&lt;/p&gt;
+
+&lt;p&gt;下面的内容是我阅读AWS架构完善&lt;a href=&quot;https://d1.awsstatic-china.com/whitepapers/architecture/AWS-Security-Pillar.pdf&quot;&gt;安全性支柱白皮书&lt;/a&gt;时整理的笔记和心得。&lt;/p&gt;
+
+&lt;h3 id=&quot;12-安全性设计原则&quot;&gt;1.2 安全性设计原则&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;最小权限原则&lt;/strong&gt;
+在与AWS的资源进行交互时，只授予必要的最小的、有有效期限的权限&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;可追溯性&lt;/strong&gt;
+记录必要的信息，确保关心的操作或系统状态变化能够被监控、报警和审计&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;在一切层面考虑安全性&lt;/strong&gt;
+除了考虑系统边界的安全性以外，还需要系统内部不同层面加以考虑，如：虚拟机、操作系统、软件、网络、负载均衡&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;自动化安全性最佳实践&lt;/strong&gt;
+使用基于软件的安全机制有助于更快、更高效地扩展应用，具体应用方式？&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;保护传输中的、静态的数据&lt;/strong&gt;
+对数据按敏感程度分级，使用合适的方式进行保护，包括：加密、Tokenization、访问权限控制&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;避免人们直接操作数据&lt;/strong&gt;
+创建机制或工具，避免人面直接操作数据，避免失误导致损失&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;提前为安全事件做好准备&lt;/strong&gt;
+创建安全事件处理流程，并进行演练检验其有效性；使用自动化工具提高问题发现、处理的效率。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;2-身份与访问管理&quot;&gt;2. 身份与访问管理&lt;/h2&gt;
+&lt;p&gt;身份与访问管理确保只有经过认证和授权的用户能够以指定的方式访问资源，是系统安全性的关键内容。需要关心如何保护AWS凭证和进行细粒度的授权。&lt;/p&gt;
+
+&lt;h3 id=&quot;21-保护凭证&quot;&gt;2.1 保护凭证&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;root账号的使用：使用多因子认证进行保护，完成相关配置后删除访问密钥；不直接使用，只用于创建低权限的子账号进行业务管理&lt;/li&gt;
+  &lt;li&gt;联合认证：通过 SAML 2.0 或者 Web 身份机制？减少创建新用户的需求，有效利用已有机制&lt;/li&gt;
+  &lt;li&gt;人机交互密码保护：满足一定的复杂性要求、定期修改、使用多因子认证&lt;/li&gt;
+  &lt;li&gt;机机交互凭证保护：使用访问密钥ID和机密密钥（AWS STS，AK/SK）进行访问；避免凭证泄漏，凭证需要加密存储，避免在日志中打印，避免明文硬编码在源代码中，避免不小心入库&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;相关的AWS服务：AWS STS，AWS EC2 metadata&lt;/p&gt;
+
+&lt;h3 id=&quot;22-细粒度授权&quot;&gt;2.2 细粒度授权&lt;/h3&gt;
+&lt;p&gt;认证和授权的核心在于：定义主角：如用户、组、角色、服务，创建并指定策略，严格按策略进行访问控制。
+对访问进行细粒度的授权有以下好处：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;减少凭证泄漏后带来的影响&lt;/li&gt;
+  &lt;li&gt;简化审计复杂度&lt;/li&gt;
+  &lt;li&gt;极具鲁棒性的访问管理框架&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;相关的AWS服务：IAM、AWS Organizations（中心化地管理不同AWS账号的资源访问策略）&lt;/p&gt;
+
+&lt;h2 id=&quot;3-检测控制&quot;&gt;3. 检测控制&lt;/h2&gt;
+
+&lt;h3 id=&quot;31-日志收集与分析&quot;&gt;3.1 日志收集与分析&lt;/h3&gt;
+&lt;p&gt;即把必要的信息以日志的、事件形势记录下来，统一收集分析，日志采集或事件记录可以通过API调用的方式发送到相关日志、审计服务。&lt;/p&gt;
+
+&lt;p&gt;相关的AWS服务：Amazon GuardDuty 、AWS Config、AWS CloudWatch Logs、AWS S3、AWS Glacier、AWS Athena&lt;/p&gt;
+
+&lt;h3 id=&quot;32-将审计控制与通知和工作流进行整合&quot;&gt;3.2 将审计控制与通知和工作流进行整合&lt;/h3&gt;
+&lt;p&gt;即事件、问题管理流程中，类型为安全性的部分，参考运维管理领域的事件问题管理流程即可；另外值得一提的是，还可以在CICD的过程中考虑安全性，例如：构建时检测是否存在未解决的安全类issue、bug。&lt;/p&gt;
+
+&lt;p&gt;相关的AWS服务：AWS Config Rules、Amazon Inspector（ 用于检测构建过程发现的安全性问题）、AWS CloudWatch Logs/API/SDK&lt;/p&gt;
+
+&lt;h2 id=&quot;4-基础设施保护&quot;&gt;4. 基础设施保护&lt;/h2&gt;
+
+&lt;h3 id=&quot;41-保护网络和主机级边界&quot;&gt;4.1 保护网络和主机级边界&lt;/h3&gt;
+&lt;p&gt;可以从以下几个方面进行考虑：设计系统的网络拓扑，合理规划网络区域、合理选择网络安全区部署组件、考虑系统流量走向，合理配置防火墙、VPC、子网、安全组，NACLs，只允许必要的访问流量&lt;/p&gt;
+
+&lt;p&gt;相关的AWS服务：Amazon VPC Security Groups 、 AWS Shield （antiDDos）、AWS WAF（网络应用防火墙）、AWS Firewall Manager（中心化管理不同AWS账号的WAF规则）、AWS Direct Connect（连接自己的数据中心到AWS VPC）&lt;/p&gt;
+
+&lt;h3 id=&quot;42-系统安全配置和维护&quot;&gt;4.2 系统安全配置和维护&lt;/h3&gt;
+&lt;p&gt;监控并确保系统的配置处于期望的安全状态。确保及时对主机系统进行应用最新的补丁进行安全加固（可以使用EC2 Systems Manager的维护窗口、补丁管理进行加固）、或使用一次性的计算资源，需要时直接使用CloudFormation应用最新的OS模板创建计算资源实例，确保系统是最新的。&lt;/p&gt;
+
+&lt;p&gt;相关的AWS服务：AWS Inspector、AWS CloudFormation&lt;/p&gt;
+
+&lt;h3 id=&quot;43-实施服务级的保护&quot;&gt;4.3 实施服务级的保护&lt;/h3&gt;
+&lt;p&gt;设置更细粒度的权限访问配置，指定指定的凭证/服务具有对指定服务资源的访问权限。&lt;/p&gt;
+
+&lt;p&gt;相关的AWS服务：AWS KMS、AWS S3（支持对桶进行细粒度权限配置）、AWS SNS（支持对=主题进行细粒度权限配置）&lt;/p&gt;
+
+&lt;h2 id=&quot;5-数据保护&quot;&gt;5. 数据保护&lt;/h2&gt;
+
+&lt;h3 id=&quot;51-数据分级&quot;&gt;5.1 数据分级&lt;/h3&gt;
+&lt;p&gt;根据数据的敏感程度对组织的数据进行分类。考虑以下要素：数据类型、数据存储的位置、访问级别、保护方式（加密/访问控制）。实施数据保护时，平衡安全性与可用性，采用纵深防御策略（多层防御，通过强认证、确保访问来自受信任区域）。并且避免手动操作数据。&lt;/p&gt;
+
+&lt;h3 id=&quot;52-加密令牌encryptiontokenization&quot;&gt;5.2 加密/令牌（Encryption/Tokenization）&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;加密&lt;/strong&gt; 
+即加密&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;令牌&lt;/strong&gt;
+令牌用于表达信息中的某一段敏感片段，例如：通过令牌表达客户的信用卡号，令牌内容必须毫无意义。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;考虑要点&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;自己定义的数据分类模型，以及每一层级的访问权限&lt;/li&gt;
+  &lt;li&gt;要求实现的安全合规要求，严格遵守&lt;/li&gt;
+  &lt;li&gt;根据场景选择令牌或加密进行数据保护&lt;/li&gt;
+  &lt;li&gt;考虑解密密钥的访问权限&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;53-保护静态数据&quot;&gt;5.3 保护静态数据&lt;/h3&gt;
+
+&lt;p&gt;通过加密或访问控制的方式保护静态数据，包括：块存储、对象存储、数据库、归档文件等&lt;/p&gt;
+
+&lt;h3 id=&quot;54-保护传输中的数据&quot;&gt;5.4 保护传输中的数据&lt;/h3&gt;
+&lt;p&gt;系统内、系统——用户侧两种路线传输的数据都需要考虑，使用安全的实现了TLS的通信协议，比如https加密通信，以保护数据可靠性与完整性。&lt;/p&gt;
+
+&lt;p&gt;关键的AWS服务：ACM（管理https证书）&lt;/p&gt;
+
+&lt;h3 id=&quot;55-数据备份复制恢复&quot;&gt;5.5 数据备份/复制/恢复&lt;/h3&gt;
+&lt;p&gt;Amazon S3（可用性达“11个9”），Amazon RDS、Amazon EBS、Amazon Glacier均提供了相应的数据备份恢复机制。&lt;/p&gt;
+
+&lt;p&gt;相关的AWS服务：AWS KMS、AWS S3、AWS EBS、AWS Glacier&lt;/p&gt;
+
+&lt;h2 id=&quot;6-事件响应&quot;&gt;6. 事件响应&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;快速隔离环境，如：通过修改虚拟机安全组进行隔离&lt;/li&gt;
+  &lt;li&gt;使处理进程可见非常重要&lt;/li&gt;
+  &lt;li&gt;进行RCA&lt;/li&gt;
+  &lt;li&gt;临时决定赋予某个人权限可能引入其他问题，需要提前准备好&lt;/li&gt;
+  &lt;li&gt;取底——卷打快照，留待恢复分析&lt;/li&gt;
+  &lt;li&gt;使用CloudFormation创建&lt;strong&gt;清洁室&lt;/strong&gt;进行分析&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;相关的AWS服务：IAM、AWS CloudFormation、AWS CloudTrail、AWS CloudWatch Event、AWS Step Function&lt;/p&gt;
+
+&lt;h2 id=&quot;7-总结&quot;&gt;7. 总结&lt;/h2&gt;
+&lt;p&gt;安全是一项长期的工作，每一次安全性问题的出现，都应该被看作是对系统架构的安全性进行完善的机会。考虑系统架构设计的安全性时，从以下几点着手：使用强的身份认证和访问控制、自动化安全事件响应、在不同层级对基础设施进行防护、对静态/传输中的数据进行分级/加密保护。&lt;/p&gt;
+
+&lt;h2 id=&quot;8-心得感想&quot;&gt;8. 心得感想&lt;/h2&gt;
+&lt;p&gt;问：回想在实际工作中我们是如何保障产品的安全性的呢？&lt;/p&gt;
+
+&lt;p&gt;答曰：测试。&lt;/p&gt;
+
+&lt;h4 id=&quot;安全测试&quot;&gt;安全测试&lt;/h4&gt;
+&lt;p&gt;在开发团队进行功能开发时，部分成员由于缺乏相应的知识与经验，无法全面系统地考虑到在哪些层面应该做好必要的防护，不可避免地会引入数目相当可观的安全性问题，因此在产品转测后，需要专业的安全测试团队介入，启动系统全面的安全测试。在那不太美好的回忆里，安全性问题大致可以划分为以下几大类：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;文件、目录权限过大（比如密钥、证书、秘文权限应该是600）&lt;/li&gt;
+  &lt;li&gt;敏感信息未加密存储、日志中打印敏感信息（明文密码、公网IP等）&lt;/li&gt;
+  &lt;li&gt;操作系统、引用的软件存在高危漏洞&lt;/li&gt;
+  &lt;li&gt;使用开源三方软件隐含的法务风险（使用fossid识别源码归属）&lt;/li&gt;
+  &lt;li&gt;使用不安全的加密算法&lt;/li&gt;
+  &lt;li&gt;ddos攻击下系统可用性不足&lt;/li&gt;
+  &lt;li&gt;存在横向纵向越权问题&lt;/li&gt;
+  &lt;li&gt;使用权限过大的账号（如root）运行业务程序&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;安全问题整改&quot;&gt;安全问题整改&lt;/h4&gt;
+&lt;p&gt;随着安全测试的进行，开发同学门陆陆续续接收到五花八门的问题单，一会儿笑话自己写出如此低级而严重的安全Bug，一会儿吐槽变态的安全红线要求，在修改问题单时，逐渐加深对系统安全性设计实现的认识，得以成长。&lt;/p&gt;
+
+&lt;h4 id=&quot;对照设计原则与要点&quot;&gt;对照设计原则与要点&lt;/h4&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;AWS架构完善安全性支柱设计原则/要点&lt;/th&gt;
+      &lt;th&gt;工作实践&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;最小权限原则&lt;/td&gt;
+      &lt;td&gt;系统文件、目录权限有保证，但账号、服务未考量&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;可追溯性&lt;/td&gt;
+      &lt;td&gt;对接公有云的审计服务，在API调用时将审计日志发送到审计服务&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;在一切层面考虑安全性&lt;/td&gt;
+      &lt;td&gt;done&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;自动化安全性最佳实践&lt;/td&gt;
+      &lt;td&gt;not yet&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;保护传输中的、静态的数据&lt;/td&gt;
+      &lt;td&gt;done&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;避免人们直接操作数据&lt;/td&gt;
+      &lt;td&gt;使用代码自动化数据库升级，使用权限受限的运维页面操作数据库&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;提前为安全事件做好准备&lt;/td&gt;
+      &lt;td&gt;not yet&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h2 id=&quot;9-参考链接&quot;&gt;9. 参考链接&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;https://d1.awsstatic-china.com/whitepapers/architecture/AWS-Security-Pillar.pdf&lt;/li&gt;
+  &lt;li&gt;https://amazonaws-china.com/cn/architecture/well-architected/&lt;/li&gt;
+  &lt;li&gt;https://amazonaws-china.com/cn/blogs/apn/the-5-pillars-of-the-aws-well-architected-framework/&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.skyhighnetworks.com/cloud-security-university/tokenization-vs-encryption/&quot;&gt;Tokenization vs Encryption&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">关键词：AWS, Architects, Well-Architected Framework, Security</summary></entry><entry><title type="html">AWS架构完善五大支柱之卓越操作支柱</title><link href="http://172.17.0.3:8000/blog/jekyll/architects/framework/2019/02/13/aws-well-architected-framework-operational-excellence-pillar.html" rel="alternate" type="text/html" title="AWS架构完善五大支柱之卓越操作支柱" /><published>2019-02-13T11:57:00+00:00</published><updated>2019-02-13T11:57:00+00:00</updated><id>http://172.17.0.3:8000/blog/jekyll/architects/framework/2019/02/13/aws-well-architected-framework-operational-excellence-pillar</id><content type="html" xml:base="http://172.17.0.3:8000/blog/jekyll/architects/framework/2019/02/13/aws-well-architected-framework-operational-excellence-pillar.html">&lt;p&gt;关键词：AWS, Architects, Well-Architected Framework, Operational Execellence&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;https://github.com/Ethan-zhengyw/EveryThingNote/blob/master/2019/02/images/aws-well-architected-framework-operational-excellence-pillar.svg&quot; alt=&quot;本文结构&quot; /&gt;&lt;/p&gt;
 
