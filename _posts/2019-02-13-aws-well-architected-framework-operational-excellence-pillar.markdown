@@ -6,7 +6,7 @@ categories: blog jekyll architects framework
 ---
 关键词：AWS, Architects, Well-Architected Framework, Operational Execellence
 
-![本文结构](https://github.com/Ethan-zhengyw/EveryThingNote/blob/master/2019/02/images/aws-well-architected-framework-operational-excellence-pillar.svg)
+![本文结构](/assets/images/aws-well-architected-framework-operational-excellence-pillar.svg)
 
 ## 前言
 

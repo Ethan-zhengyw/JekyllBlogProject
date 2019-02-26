@@ -6,7 +6,7 @@ categories: blog jekyll architects framework
 ---
 关键词：AWS, Architects, Well-Architected Framework, Security
 
-![本文结构](https://github.com/Ethan-zhengyw/EveryThingNote/blob/master/2019/02/images/aws-well-architected-framework-security-pillar.svg)
+![本文结构](/assets/images/aws-well-architected-framework-security-pillar.png)
 
 ## 1. 前言
 ### 1.1 安全性定义
